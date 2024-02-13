@@ -1,0 +1,9 @@
+**/Builds
+**/Build
+**/builds
+**/build
+**/.DS_Store
+cmake-build-*
+out
+.idea
+.vs
