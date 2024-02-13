@@ -1,0 +1,64 @@
+{
+  "tests": [
+    {
+      "name": "Warnings Test",
+      "setup": "cmake -B Builds; make -C Builds > compile_output.txt 2>&1",
+      "run": "printf '\\n\\nRunning test...\\n\\n'; if grep -i 'warning' compile_output.txt; then echo 'Compiler warnings found.'; exit 1; else echo 'No compiler warnings.'; exit 0; fi",
+      "input": "",
+      "output": "",
+      "comparison": "exact",
+      "timeout": 2,
+      "points": 5
+    },
+    {
+      "name": "Compile Test",
+      "setup": "cmake -B Builds; make -C Builds --silent",
+      "run": "printf '\\n\\nRunning test...\\n\\n'; ./Builds/Assignment_3 compile .",
+      "input": "",
+      "output": "",
+      "comparison": "exact",
+      "timeout": 2,
+      "points": 5
+    },
+    {
+      "name": "NoFilter Test",
+      "setup": "",
+      "run": "printf '\\n\\nRunning test...\\n\\n'; ./Builds/Assignment_3 nofilter .",
+      "input": "",
+      "output": "",
+      "comparison": "exact",
+      "timeout": 2,
+      "points": 30
+    },
+    {
+      "name": "Query Test",
+      "setup": "",
+      "run": "printf '\\n\\nRunning test...\\n\\n'; ./Builds/Assignment_3 query .",
+      "input": "",
+      "output": "",
+      "comparison": "exact",
+      "timeout": 2,
+      "points": 10
+    },
+    {
+      "name": "Basic Test",
+      "setup": "",
+      "run": "printf '\\n\\nRunning test...\\n\\n'; ./Builds/Assignment_3 basic .",
+      "input": "",
+      "output": "",
+      "comparison": "exact",
+      "timeout": 2,
+      "points": 20
+    },
+    {
+      "name": "Advanced Test",
+      "setup": "",
+      "run": "printf '\\n\\nRunning test...\\n\\n'; ./Builds/Assignment_3 advanced .",
+      "input": "",
+      "output": "",
+      "comparison": "exact",
+      "timeout": 2,
+      "points": 20
+    }
+  ]
+}
