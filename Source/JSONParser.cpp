@@ -83,8 +83,8 @@ namespace ECE141 {
 		return true;
 	}
 
-	bool JSONParser::didParse(bool aState) {
-		return aState;
+	bool JSONParser::didParse(bool aStatus) {
+		return aStatus;
 	}
 
 	bool JSONParser::willParse(JSONListener *aListener) {

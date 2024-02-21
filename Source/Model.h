@@ -7,21 +7,33 @@
 #include <string>
 #include <optional>
 #include "JSONParser.h"
+#include <variant>
+#include <vector>
+#include <map>
+#include <sstream>
 
 namespace ECE141 {
 
 	class ModelQuery; // Forward declare
 
 	// STUDENT: Your Model is built from a bunch of these...
-	class ModelNode {
+	struct ModelNode {
 		// Sometimes a node holds a basic value (null, bool, number, string)
 		// Sometimes a node holds a list of other nodes (list)
 		// Sometimes a node holds a collection key-value pairs, where the value is a node (an object)
+        struct NullType{};
+        using ListType = std::vector<std::shared_ptr<ModelNode>>;
+        using ObjectType = std::map<std::string,std::shared_ptr<ModelNode>>;
+        std::variant<bool,double,std::string,NullType,ObjectType,ListType> value;
+
+        ModelNode() = default;
+        ~ModelNode() = default;
 
 	};
 
 	class Model : public JSONListener {
 	public:
+
 		Model();
 		~Model() override = default;
 		Model(const Model& aModel);
@@ -36,9 +48,19 @@ namespace ECE141 {
 		bool openContainer(const std::string &aKey, Element aType) override;
 		bool closeContainer(const std::string &aKey, Element aType) override;
 
+
 		// STUDENT: Your model will contain a collection of ModelNode*'s
 		//          Choose your container(s) wisely
+        std::shared_ptr<ModelNode> rootNode;
+        std::vector<std::shared_ptr<ModelNode>> nodeStack;
 
+        template<typename T>
+        static T convertToType(const std::string& anInput){
+            std::stringstream iss(anInput);
+            T value;
+            iss >> std::boolalpha >> value;
+            return value;
+        }
 	};
 
 	class ModelQuery {

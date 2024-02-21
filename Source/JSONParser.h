@@ -39,7 +39,7 @@ namespace ECE141 {
 	//--------------------------------------------
 	// Used for parsing to keep track of state
 	struct JSONState {
-		JSONState(const std::string& aKey, Element aType = Element::object) : key(aKey), type(aType) {}
+		explicit JSONState(const std::string& aKey, Element aType = Element::object) : key(aKey), type(aType) {}
 
 		JSONState(const JSONState &aCopy)
 			: key(aCopy.key), type(aCopy.type) {}
