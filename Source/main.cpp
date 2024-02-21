@@ -63,7 +63,7 @@ int main(const int argc, const char* argv[]) {
     ModelNode myNode;
 //    myNode.value = ModelNode::ObjectType{{"key", ModelNode{5.0}}};
 
-    std::string filepath = "/Users/dsechs/Library/CloudStorage/OneDrive-UCSanDiego/Desktop/ECE 141A/PA3/Resources/test.json";
+    std::string filepath = "/Users/dsechs/Library/CloudStorage/OneDrive-UCSanDiego/Desktop/ECE 141A/PA3/Resources/sammy.json";
     std::ifstream inputFile(filepath);
 //    std::istream& inputStream = inputFile;
 

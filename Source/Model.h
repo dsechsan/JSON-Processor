@@ -23,9 +23,9 @@ namespace ECE141 {
 		// Sometimes a node holds a list of other nodes (list)
 		// Sometimes a node holds a collection key-value pairs, where the value is a node (an object)
         struct NullType{};
-        using ListType = std::vector<ModelNode>;
-        using ObjectType = std::map<std::string,ModelNode>;
-        std::variant<bool,double,std::string,NullType,std::shared_ptr<ObjectType>,std::shared_ptr<ListType>> value;
+        using ListType = std::vector<std::shared_ptr<ModelNode>>;
+        using ObjectType = std::map<std::string,std::shared_ptr<ModelNode>>;
+        std::variant<bool,double,std::string,NullType,ObjectType,ListType> value;
 
         ModelNode() : value(NullType{}){};
 
@@ -39,11 +39,11 @@ namespace ECE141 {
             }
         }
 
-        ModelNode(const std::shared_ptr<ObjectType>& obj ){
+        ModelNode(const ObjectType &obj ){
             value = deepCopyObjectType(obj);
         }
 
-        explicit ModelNode(const std::shared_ptr<ListType>& list ){
+        explicit ModelNode(const ListType & list ){
             value = deepCopyListType(list);
         }
 
@@ -57,28 +57,28 @@ namespace ECE141 {
                 value = std::get<std::string>(aCopy.value);
             } else if (std::holds_alternative<NullType>(aCopy.value)) {
                 value = NullType{};
-            } else if (std::holds_alternative<std::shared_ptr<ObjectType>>(aCopy.value)) {
-                auto theOriginalObj = std::get<std::shared_ptr<ObjectType>>(aCopy.value);
+            } else if (std::holds_alternative<ObjectType>(aCopy.value)) {
+                auto theOriginalObj = std::get<ObjectType>(aCopy.value);
                 value = deepCopyObjectType(theOriginalObj);
-            } else if (std::holds_alternative<std::shared_ptr<ListType>>(aCopy.value)) {
-                auto theOriginalList = std::get<std::shared_ptr<ListType>>(aCopy.value);
+            } else if (std::holds_alternative<ListType>(aCopy.value)) {
+                auto theOriginalList = std::get<ListType>(aCopy.value);
                 value = deepCopyListType(theOriginalList);
             }
         }
 
 
-        static std::shared_ptr<ObjectType> deepCopyObjectType(const std::shared_ptr<ObjectType>& aOriginalObj) {
-            auto theCopy = std::make_shared<ObjectType>();
-            for (const auto &pair : *aOriginalObj) {
-                theCopy->insert({pair.first,ModelNode(pair.second)});
+        static ObjectType deepCopyObjectType(const ObjectType & aOriginalObj) {
+            ObjectType theCopy;
+            for (const auto &pair : aOriginalObj) {
+                theCopy.insert({pair.first,std::make_shared<ModelNode>(*pair.second)});
             }
             return theCopy;
         }
 
-        static std::shared_ptr<ListType> deepCopyListType(const std::shared_ptr<ListType>& aOriginalList) {
-            auto theCopy = std::make_shared<ListType >();
-            for (const auto &val : *aOriginalList) {
-                theCopy->emplace_back(val);
+        static ListType deepCopyListType(const ListType & aOriginalList) {
+            ListType theCopy;
+            for (const auto &val : aOriginalList) {
+                theCopy.emplace_back(std::make_shared<ModelNode>(*val));
             }
             return theCopy;
         }
@@ -122,7 +122,6 @@ namespace ECE141 {
         }
 
 
-        void printModelStructure(std::shared_ptr<ModelNode> node, int depth) const;
     };
 
 	class ModelQuery {
@@ -160,23 +159,22 @@ namespace ECE141 {
             if(!currentNode) return false;
             if(component.front() == '\'' && component.back() == '\''){
                 std::string theKey = component.substr(1,component.length()-2);
-                if(std::holds_alternative<std::shared_ptr<ModelNode::ObjectType>>(currentNode->value)){
-                    auto obj = std::get<std::shared_ptr<ModelNode::ObjectType>>(currentNode->value);
+                if(std::holds_alternative<ModelNode::ObjectType>(currentNode->value)){
+                    auto obj = std::get<ModelNode::ObjectType>(currentNode->value);
                     // traversal - find keyword works on map, returns end if it doesn't find any;
-                    auto found = obj->find(theKey);
-                    if (found != obj->end()) {
-                        currentNode = std::make_shared<ModelNode>(found->second);
-
+                    auto found = obj.find(theKey);
+                    if (found != obj.end()) {
+                        currentNode = found->second;
                         return true;
                     }
                 }
             }else{
                 int index = std::stoi(component);
-                if(std::holds_alternative<std::shared_ptr<ModelNode::ListType>>(currentNode->value)){
-                    auto list = std::get<std::shared_ptr<ModelNode::ListType>>(currentNode->value);
-                    int theListLen = static_cast<int>(list->size());
+                if(std::holds_alternative<ModelNode::ListType>(currentNode->value)){
+                    auto list = std::get<ModelNode::ListType>(currentNode->value);
+                    int theListLen = static_cast<int>(list.size());
                     if(index >=0 && index < theListLen){
-                        currentNode = std::make_shared<ModelNode>(list->at(index));
+                        currentNode = list.at(index);
                         return true;
                     }
                 }
