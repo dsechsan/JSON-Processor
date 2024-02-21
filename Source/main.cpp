@@ -11,8 +11,13 @@
 
 // STUDENT: Be sure to update this path if necessary (should point to the repo directory)
 inline std::string getWorkingDirectoryPath() {
+<<<<<<< HEAD
     //return "C:/UCSD/ECE 141A/Assignments/pa3-json-processor-YourName";
     return ".";
+=======
+    return "/Users/dsechs/Library/CloudStorage/OneDrive-UCSanDiego/Desktop/ECE 141A/PA3";
+//    return ".";
+>>>>>>> 34dca01 (Except filtering, all tests pass)
 }
 
 bool runAutoGraderTest(const std::string& aPath, const std::string& aTestName) {
@@ -76,7 +81,12 @@ int main(const int argc, const char* argv[]) {
 //    auto theQuery = model.createQuery();
 //    auto theResult = theQuery.select("'sammy'.'followers'");
 
-    std::cout << "Life is a beaut" << "\n";
+//    if(theResult) std::cout << *theResult << "\n";
+
+    std::string aPath = "/Users/dsechs/Library/CloudStorage/OneDrive-UCSanDiego/Desktop/ECE 141A/PA3";
+    std::string aTestName = "NoFilterTest";
+
+    runAutoGraderTest(aPath,aTestName);
 
     ECE141::Model model2(model);
     auto model3 = model2;
@@ -87,7 +97,7 @@ int main(const int argc, const char* argv[]) {
     if (theResult) std::cout << *theResult << "\n";
 
     std::string aPath = "/Users/dsechs/Library/CloudStorage/OneDrive-UCSanDiego/Desktop/ECE 141A/PA3";
-    std::string aTestName = "";
+    std::string aTestName = "NoFilterTest";
 
     runAutoGraderTest(aPath,aTestName);
 

@@ -4,6 +4,7 @@
 
 #include "Model.h"
 #include "Debug.h"
+#include <numeric>
 
 namespace ECE141 {
 
@@ -52,7 +53,17 @@ namespace ECE141 {
                         } else if (aValue == "null") {
                             theNewNode->value = ModelNode::NullType{};
                         } else {
-                            theNewNode->value = convertToType<double>(aValue);
+                            std::stringstream iss(aValue);
+                            double dValue;
+                            iss >> dValue;
+
+                            if (!iss.fail() && iss.eof()) {
+                                if (dValue == static_cast<double>(static_cast<int>(dValue))) {
+                                    theNewNode->value = static_cast<int>(dValue);
+                                } else {
+                                    theNewNode->value = dValue;
+                                }
+                            }
                         }
                         break;
 
@@ -72,7 +83,7 @@ namespace ECE141 {
         if(!nodeStack.empty()) {
             auto &currentNode = nodeStack.back();
             if(std::holds_alternative<ModelNode::ListType>(currentNode->value)) {
-                auto list =std::get<ModelNode::ListType>(currentNode->value);
+                auto &list =std::get<ModelNode::ListType>(currentNode->value);
                 auto theNewNode = std::make_shared<ModelNode>();
                 switch (aType) {
                     case Element::quoted:
@@ -85,7 +96,17 @@ namespace ECE141 {
                         } else if (aValue == "null") {
                             theNewNode->value = ModelNode::NullType{};
                         } else {
-                            theNewNode->value = convertToType<double>(aValue);
+                            std::stringstream iss(aValue);
+                            double dValue;
+                            iss >> dValue;
+
+                            if (!iss.fail() && iss.eof()) {
+                                if (dValue == static_cast<double>(static_cast<int>(dValue))) {
+                                    theNewNode->value = static_cast<int>(dValue);
+                                } else {
+                                    theNewNode->value = dValue;
+                                }
+                            }
                         }
                         break;
 
@@ -157,29 +178,96 @@ namespace ECE141 {
 	}
 
 	ModelQuery& ModelQuery::filter(const std::string& aQuery) {
-//		DBG("filter(" << aQuery << ")");
-//		TODO;
+
 
 		return *this;
 	}
 
 	size_t ModelQuery::count() {
-//		DBG("count()");
-//		TODO;
+        if (!currentNode) {
+            return 0;
+        }
 
-		return 0;
+        if (std::holds_alternative<ModelNode::ObjectType>(currentNode->value)) {
+            auto &obj = std::get<ModelNode::ObjectType>(currentNode->value);
+            return obj.size();
+        }
+
+        else if (std::holds_alternative<ModelNode::ListType>(currentNode->value)) {
+            auto &list = std::get<ModelNode::ListType>(currentNode->value);
+            return list.size();
+        }
+
+        return 0;
 	}
 
 	double ModelQuery::sum() {
-//		DBG("sum()");
-//		TODO;
+        double sum = 0.0;
+        if(!currentNode){
+            return 0.0;
+        }
 
+        if (std::holds_alternative<ModelNode::ListType>(currentNode->value)) {
+            auto &list = std::get<ModelNode::ListType>(currentNode->value);
+            for(auto &val : list){
+                if(std::holds_alternative<double>(val->value)){
+                    sum+= std::get<double>(val->value) ;
+                }else if(std::holds_alternative<int>(val->value)) {
+                    sum += static_cast<double>(std::get<int>(val->value));
+                }
+            }
+            return sum;
+        }
 		return 0.0;
 	}
 
 	std::optional<std::string> ModelQuery::get(const std::string& aKeyOrIndex) {
-//		DBG("get(" << aKeyOrIndex << ")");
-//		TODO;
+        if(!currentNode){
+            return std::nullopt;
+        }
+        std::stringstream ss;
+        if(aKeyOrIndex == "*"){
+            if(std::holds_alternative<ModelNode::ObjectType>(currentNode->value)){
+                auto &obj = std::get<ModelNode::ObjectType>(currentNode->value);
+                ss << "{";
+                for (auto val = obj.begin(); val != obj.end(); val++){
+                    if(val != obj.begin()) ss << ",";
+                    ss << "\"" << val->first << "\":" << nodePtrToString(val->second);
+                }
+                ss << "}";
+            }else if(std::holds_alternative<ModelNode::ListType>(currentNode->value)){
+                auto &list = std::get<ModelNode::ListType>(currentNode->value);
+                ss << "[";
+                for (size_t i = 0; i< list.size(); i++){
+                    if(i>0) ss << ", ";
+                    ss << nodePtrToString(list[i]);
+                }
+                ss << "]";
+            }
+            return ss.str();
+        }
+
+        if(std::holds_alternative<ModelNode::ObjectType>(currentNode->value)){
+            auto &obj = std::get<ModelNode::ObjectType>(currentNode->value);
+            std::string theKey;
+            if(aKeyOrIndex.front() == '\'' && aKeyOrIndex.back() == '\'') {
+                theKey = aKeyOrIndex.substr(1, aKeyOrIndex.length() - 2);
+            }
+            auto val = obj.find(theKey);
+            if(val != obj.end()){
+                ss << nodePtrToString(val->second) ;
+                return ss.str();
+            }
+        }
+
+        if(std::holds_alternative<ModelNode::ListType>(currentNode->value)){
+            auto &list = std::get<ModelNode::ListType>(currentNode->value);
+            int index = std::stoi(aKeyOrIndex);
+            if(index >=0 && index < static_cast<int>(list.size())){
+                ss << nodePtrToString(list[index]);
+                return ss.str();
+            }
+        }
 
 		return std::nullopt;
 	}
