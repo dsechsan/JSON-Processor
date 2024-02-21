@@ -70,7 +70,13 @@ int main(const int argc, const char* argv[]) {
     ECE141::JSONParser jsonParser(inputFile);
     ECE141::Model model;
     jsonParser.parse(&model);
-    std::cout << "life is beaut" << "\n";
+
+
+    ECE141::Model model2(model);
+//    auto theQuery = model.createQuery();
+//    auto theResult = theQuery.select("'sammy'.'followers'");
+
+    std::cout << "Life is a beaut" << "\n";
 
     ECE141::Model model2(model);
     auto model3 = model2;
@@ -78,12 +84,12 @@ int main(const int argc, const char* argv[]) {
     auto theQuery = model.createQuery();
     auto theResult = theQuery.select("'list'").filter("index < 2").get("*");
 
-//    if (theResult) std::cout << *theResult << "\n";
-//
-//    std::string aPath = "/Users/dsechs/Library/CloudStorage/OneDrive-UCSanDiego/Desktop/ECE 141A/PA3";
-//    std::string aTestName = "";
-//
-//    runAutoGraderTest(aPath,aTestName);
+    if (theResult) std::cout << *theResult << "\n";
+
+    std::string aPath = "/Users/dsechs/Library/CloudStorage/OneDrive-UCSanDiego/Desktop/ECE 141A/PA3";
+    std::string aTestName = "";
+
+    runAutoGraderTest(aPath,aTestName);
 
 
 }

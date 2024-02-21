@@ -9,21 +9,26 @@ namespace ECE141 {
 
 	// ---Model---
 
-	Model::Model() {
-
-//		TODO; // Remove once you have implemented this method
-	}
+	Model::Model() : rootNode(std::make_shared<ModelNode>()) {}
 
 	Model::Model(const Model& aModel) {
-//		TODO;
+        if(aModel.rootNode){
+            rootNode = std::make_shared<ModelNode>(*aModel.rootNode);
+        }
 	}
 
 	Model &Model::operator=(const Model& aModel) {
-//		TODO;
-		return *this;
+        if(this!= &aModel){
+            if(aModel.rootNode){
+                rootNode = std::make_shared<ModelNode>(*aModel.rootNode);
+            }else {
+                rootNode = nullptr;
+            }
+        }
+        return *this;
 	}
 
-	ModelQuery Model::createQuery() {
+	ModelQuery Model::createQuery(){
         return ModelQuery(*this);
 //        return *this;
     }
@@ -111,7 +116,7 @@ namespace ECE141 {
        if(nodeStack.empty()){
            rootNode = theNewNode;
        }else{
-           auto currentContainer = nodeStack.back();
+           auto &currentContainer = nodeStack.back();
            if(std::holds_alternative<std::shared_ptr<ModelNode::ObjectType>>(currentContainer->value)){
                auto &obj = std::get<std::shared_ptr<ModelNode::ObjectType>>(currentContainer->value);
                obj->insert({aKey,*theNewNode});
@@ -126,21 +131,43 @@ namespace ECE141 {
 	}
 
 	bool Model::closeContainer(const std::string& aKey, Element aType) {
+        if(nodeStack.empty()){
+            return false;
+        }
+
+        auto closedContainer = nodeStack.back();
+        nodeStack.pop_back();
+
         if(!nodeStack.empty()){
-            nodeStack.pop_back();
+            auto &parentContainer = nodeStack.back();
+            if (std::holds_alternative<std::shared_ptr<ModelNode::ObjectType>>(parentContainer->value)) {
+                auto &obj = std::get<std::shared_ptr<ModelNode::ObjectType>>(parentContainer->value);
+                obj->insert({aKey, *closedContainer});
+            } else if (std::holds_alternative<std::shared_ptr<ModelNode::ListType>>(parentContainer->value)) {
+                auto &list = std::get<std::shared_ptr<ModelNode::ListType>>(parentContainer->value);
+                list->push_back(*closedContainer);
+            }
+        }else {
+            rootNode = closedContainer;
         }
         return true;
-
 	}
 
-	// ---ModelQuery---
 
-	ModelQuery::ModelQuery(Model &aModel) : model(aModel) {}
 
-	ModelQuery& ModelQuery::select(const std::string& aQuery) {
-//		DBG("select(" << aQuery << ")");
-//		TODO;
+    // ---ModelQuery---
 
+	ModelQuery::ModelQuery(Model &aModel) : model(aModel), currentNode(aModel.getRoot()) {}
+
+	ModelQuery &ModelQuery::select(const std::string& aQuery) {
+        auto components = parseQuery(aQuery);
+        for(const auto &component : components){
+            if(!traversal(component)){
+                std::cout << "Invalid component " << component << "\n";
+                currentNode = nullptr;
+                break;
+            }
+        }
 		return *this;
 	}
 
@@ -171,6 +198,7 @@ namespace ECE141 {
 
 		return std::nullopt;
 	}
+
 
 }
 
