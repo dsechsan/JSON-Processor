@@ -22,9 +22,9 @@ namespace ECE141 {
 		// Sometimes a node holds a list of other nodes (list)
 		// Sometimes a node holds a collection key-value pairs, where the value is a node (an object)
         struct NullType{};
-        using ListType = std::vector<std::shared_ptr<ModelNode>>;
-        using ObjectType = std::map<std::string,std::shared_ptr<ModelNode>>;
-        std::variant<bool,double,std::string,NullType,ObjectType,ListType> value;
+        using ListType = std::vector<ModelNode>;
+        using ObjectType = std::map<std::string,ModelNode>;
+        std::variant<bool,double,std::string,NullType,std::shared_ptr<ObjectType>,std::shared_ptr<ListType>> value;
 
         ModelNode() = default;
         ~ModelNode() = default;

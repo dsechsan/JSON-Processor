@@ -30,64 +30,67 @@ namespace ECE141 {
 
 
 	bool Model::addKeyValuePair(const std::string& aKey, const std::string& aValue, Element aType) {
-
 //        ModelNode theNewNode;
-        auto theNewNode = std::make_shared<ModelNode>();
-        switch (aType) {
-            case Element::quoted:
-                theNewNode->value = aValue;
-                break;
-            case Element::constant:
-                if(aValue == "true" || aValue == "false"){
-                    bool theBoolValue = convertToType<bool>(aValue);
-                    theNewNode->value = theBoolValue;
-                }else if(aValue == "null") {
-                    theNewNode->value = ModelNode::NullType{} ;
-                } else{
-                    theNewNode->value = convertToType<double>(aValue);
+        if(!nodeStack.empty()) {
+            auto &currentNode = nodeStack.back();
+            if(std::holds_alternative<std::shared_ptr<ModelNode::ObjectType>>(currentNode->value)) {
+                auto obj =std::get<std::shared_ptr<ModelNode::ObjectType>>(currentNode->value);
+                ModelNode theNewNode;
+                switch (aType) {
+                    case Element::quoted:
+                        theNewNode.value = aValue;
+                        break;
+                    case Element::constant:
+                        if (aValue == "true" || aValue == "false") {
+                            bool theBoolValue = convertToType<bool>(aValue);
+                            theNewNode.value = theBoolValue;
+                        } else if (aValue == "null") {
+                            theNewNode.value = ModelNode::NullType{};
+                        } else {
+                            theNewNode.value = convertToType<double>(aValue);
+                        }
+                        break;
+
+                    default:
+                        theNewNode.value = aValue;
+                        break;
                 }
-                break;
-
-            default:
-                theNewNode->value = aValue;
-                break;
-        }
-
-        if(!nodeStack.empty() && std::holds_alternative<ModelNode::ObjectType>(nodeStack.back()->value) ){
-            auto &object = std::get<ModelNode::ObjectType>(nodeStack.back()->value);
-            object.insert({aKey,theNewNode});
-            return true;
+                obj->insert({aKey,theNewNode});
+                return true;
+            }
         }
         return false;
     }
 
 
-
 	bool Model::addItem(const std::string& aValue, Element aType) {
-        auto theNewNode = std::make_shared<ModelNode>();
-        switch (aType) {
-            case Element::quoted:
-                theNewNode->value = aValue;
-                break;
-            case Element::constant:
-                if(aValue == "true" || aValue == "false"){
-                    bool theBoolValue = convertToType<bool>(aValue);
-                    theNewNode->value = theBoolValue;
-                }else if(aValue == "null") {
-                    theNewNode->value = ModelNode::NullType{} ;
-                } else{
-                    theNewNode->value = convertToType<double>(aValue);
-                }
-                break;
-            default:
-                theNewNode->value = aValue;
-                break;
-        }
+        if(!nodeStack.empty()) {
+            auto &currentNode = nodeStack.back();
+            if(std::holds_alternative<std::shared_ptr<ModelNode::ListType>>(currentNode->value)) {
+                auto obj =std::get<std::shared_ptr<ModelNode::ListType>>(currentNode->value);
+                ModelNode theNewNode;
+                switch (aType) {
+                    case Element::quoted:
+                        theNewNode.value = aValue;
+                        break;
+                    case Element::constant:
+                        if (aValue == "true" || aValue == "false") {
+                            bool theBoolValue = convertToType<bool>(aValue);
+                            theNewNode.value = theBoolValue;
+                        } else if (aValue == "null") {
+                            theNewNode.value = ModelNode::NullType{};
+                        } else {
+                            theNewNode.value = convertToType<double>(aValue);
+                        }
+                        break;
 
-        if(!nodeStack.empty() && std::holds_alternative<ModelNode::ListType>(nodeStack.back()->value)){
-                auto &list = std::get<ModelNode::ListType>(nodeStack.back()->value);
-                list.push_back(theNewNode);
+                    default:
+                        theNewNode.value = aValue;
+                        break;
+                }
+                obj->push_back(theNewNode);
                 return true;
+            }
         }
 
         return false;
@@ -98,21 +101,24 @@ namespace ECE141 {
 //       ModelNode theNewNode;
 
        if(aType == Element::object) {
-           theNewNode->value = ModelNode::ObjectType{};
+           theNewNode->value = std::make_shared<ModelNode::ObjectType>();
        }else if(aType == Element::array){
-           theNewNode->value = ModelNode::ListType{};
+           theNewNode->value = std::make_shared<ModelNode::ListType>();
+       }else{
+           return false;
        }
 
        if(nodeStack.empty()){
            rootNode = theNewNode;
        }else{
-           auto &currentContainer = nodeStack.back();
-           if(std::holds_alternative<ModelNode::ObjectType>(currentContainer->value)){
-               auto &obj = std::get<ModelNode::ObjectType>(currentContainer->value);
-               obj[aKey] = theNewNode;
-           }else if (std::holds_alternative<ModelNode::ListType>(currentContainer->value)){
-               auto &list = std::get<ModelNode::ListType>(currentContainer->value);
-               list.push_back(theNewNode);
+           auto currentContainer = nodeStack.back();
+           if(std::holds_alternative<std::shared_ptr<ModelNode::ObjectType>>(currentContainer->value)){
+               auto &obj = std::get<std::shared_ptr<ModelNode::ObjectType>>(currentContainer->value);
+               obj->insert({aKey,*theNewNode});
+
+           }else if (std::holds_alternative<std::shared_ptr<ModelNode::ListType>>(currentContainer->value)){
+               auto &list = std::get<std::shared_ptr<ModelNode::ListType>>(currentContainer->value);
+               list->push_back(*theNewNode);
            }
        }
        nodeStack.push_back(theNewNode);
