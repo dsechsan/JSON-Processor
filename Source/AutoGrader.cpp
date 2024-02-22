@@ -119,7 +119,7 @@ namespace ECE141 {
 
             auto theExpectedOutput = getExpectedOutput(theQuery);
             removeWhitespace(theExpectedOutput);
-
+//            std::cout << theOutput << "\n";
             assertWithMessage(theOutput == theExpectedOutput, "Test failed: '" + theQuery +
                 "'\nExpected: '" + theExpectedOutput + "', got: '" + theOutput + "'");
         }
