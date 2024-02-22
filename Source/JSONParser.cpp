@@ -103,7 +103,7 @@ namespace ECE141 {
 		return (!aListener) || aListener->openContainer(theState.key, aType);
 	}
 
-	bool JSONParser::handleCloseContainer(Element aType, JSONListener *aListener) {
+	bool JSONParser::handleCloseContainer(JSONListener *aListener) {
 		tempKey = "";
 		const std::string theKey(states.top().key);
 		if (!states.empty())
@@ -145,7 +145,7 @@ namespace ECE141 {
 				break;
 
 			case Element::closing:
-				theResult = handleCloseContainer(theTop.type, aListener);
+				theResult = handleCloseContainer( aListener);
 				skipWhile(input, isWhitespace);
 				skipIfChar(input, kComma);
 				break;

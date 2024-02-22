@@ -62,7 +62,7 @@ namespace ECE141 {
 		bool parseElements(char aChar, JSONListener *aListener);
 
 		bool handleOpenContainer(Element aType, JSONListener *aListener);
-		bool handleCloseContainer(Element aType, JSONListener *);
+		bool handleCloseContainer( JSONListener *);
 
 		std::stack<JSONState> states;
 		std::string tempKey;
