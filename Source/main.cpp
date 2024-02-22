@@ -83,10 +83,6 @@ int main(const int argc, const char* argv[]) {
 
 //    if(theResult) std::cout << *theResult << "\n";
 
-    std::string aPath = "/Users/dsechs/Library/CloudStorage/OneDrive-UCSanDiego/Desktop/ECE 141A/PA3";
-    std::string aTestName = "NoFilterTest";
-
-    runAutoGraderTest(aPath,aTestName);
 
     ECE141::Model model2(model);
     auto model3 = model2;
@@ -97,7 +93,7 @@ int main(const int argc, const char* argv[]) {
     if (theResult) std::cout << *theResult << "\n";
 
     std::string aPath = "/Users/dsechs/Library/CloudStorage/OneDrive-UCSanDiego/Desktop/ECE 141A/PA3";
-    std::string aTestName = "NoFilterTest";
+    std::string aTestName = "AdvancedTest";
 
     runAutoGraderTest(aPath,aTestName);
 

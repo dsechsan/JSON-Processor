@@ -178,10 +178,74 @@ namespace ECE141 {
 	}
 
 	ModelQuery& ModelQuery::filter(const std::string& aQuery) {
+        // parse query
+        // if query has key contains,
+        //      check if the current container is an object
+        //      check for the key substrings (find)
+        //      if it is, copy the pointer to a filteredObject and erase the rest
+        //      return the new pointer
+        // if query has index,
+        //      check if the current container is a list
+        //      check if the value of the index is within limits
+        //      move the pointer there and return it.
 
+        auto theParsedString = parseFilterQuery(aQuery);
 
-		return *this;
-	}
+        if(theParsedString.target == "key" and theParsedString.operation == "contains"){
+            if (currentNode && std::holds_alternative<ModelNode::ObjectType>(currentNode->value)) {
+                auto &obj = std::get<ModelNode::ObjectType>(currentNode->value);
+                auto filteredObj = ModelNode::deepCopyObjectType(obj);
+                auto iter = filteredObj.begin();
+                while(iter != filteredObj.end()){
+                    if(iter->first.find(theParsedString.value) == std::string::npos) {
+                        iter = filteredObj.erase(iter);
+                    }else{
+                        ++iter;
+                    }
+                }
+                auto theFilteredNode = std::make_shared<ModelNode>();
+                theFilteredNode->value = filteredObj;
+                currentNode = theFilteredNode;
+            }
+        }else if (currentNode && std::holds_alternative<ModelNode::ListType>(currentNode->value)) {
+            auto &list = std::get<ModelNode::ListType>(currentNode->value);
+            auto filteredList = ModelNode::deepCopyListType(list);
+            auto iter = filteredList.begin();
+            auto theOperator = theParsedString.operation;
+//            std::cout << std::stoi(theParsedString.value) << "\n";
+            int theCurrentIndex = 0;
+            while(iter != filteredList.end()){
+                bool theEraseCondition = false;
+                if(theOperator == "<"){
+                    theEraseCondition = theCurrentIndex >= std::stoi(theParsedString.value);
+                }else if(theOperator == "<="){
+                    theEraseCondition = theCurrentIndex > std::stoi(theParsedString.value);
+                }else if(theOperator == "=="){
+                    theEraseCondition = theCurrentIndex != std::stoi(theParsedString.value);
+                }else if(theOperator == ">"){
+                    theEraseCondition = theCurrentIndex <= std::stoi(theParsedString.value);
+                }else if(theOperator == ">="){
+                    theEraseCondition = theCurrentIndex < std::stoi(theParsedString.value);
+                }else if(theOperator == "!="){
+                    theEraseCondition = theCurrentIndex == std::stoi(theParsedString.value);
+                }
+
+                if(theEraseCondition){
+                    iter = filteredList.erase(iter);
+                    ++theCurrentIndex;
+                }else{
+                    ++iter;
+                    ++theCurrentIndex;
+                }
+            }
+
+            auto theFilteredNode = std::make_shared<ModelNode>();
+            theFilteredNode->value = filteredList;
+            currentNode = theFilteredNode;
+        }
+        return *this;
+    }
+
 
 	size_t ModelQuery::count() {
         if (!currentNode) {

@@ -25,14 +25,16 @@ namespace ECE141 {
         struct NullType{};
         using ListType = std::vector<std::shared_ptr<ModelNode>>;
         using ObjectType = std::map<std::string,std::shared_ptr<ModelNode>>;
-        std::variant<bool,double,std::string,NullType,ObjectType,ListType> value;
+        std::variant<bool,int,double,std::string,NullType,ObjectType,ListType> value;
 
         ModelNode() : value(NullType{}){};
 
-        ModelNode(std::variant<bool,double,std::string> aVal) {
+        ModelNode(std::variant<bool,int,double,std::string> aVal) {
             if (std::holds_alternative<bool>(aVal)) {
                 value = std::get<bool>(aVal);
-            } else if (std::holds_alternative<double>(aVal)) {
+            }else if (std::holds_alternative<int>(aVal)) {
+                value = std::get<int>(aVal);
+            }else if (std::holds_alternative<double>(aVal)) {
                 value = std::get<double>(aVal);
             } else if (std::holds_alternative<std::string>(aVal)) {
                 value = std::get<std::string>(aVal);
@@ -51,7 +53,9 @@ namespace ECE141 {
         ModelNode(const ModelNode& aCopy) {
             if (std::holds_alternative<bool>(aCopy.value)) {
                 value = std::get<bool>(aCopy.value);
-            } else if (std::holds_alternative<double>(aCopy.value)) {
+            } else if (std::holds_alternative<int>(aCopy.value)) {
+                value = std::get<int>(aCopy.value);
+            }else if (std::holds_alternative<double>(aCopy.value)) {
                 value = std::get<double>(aCopy.value);
             } else if (std::holds_alternative<std::string>(aCopy.value)) {
                 value = std::get<std::string>(aCopy.value);
@@ -182,7 +186,65 @@ namespace ECE141 {
             }
             return false;
         }
+        static std::string nodePtrToString(const std::shared_ptr<ModelNode>& node){
+            std::stringstream ss;
+            if(std::holds_alternative<double>(node->value)){
+                ss << std::get<double>(node->value);
+            }
+            if(std::holds_alternative<int>(node->value)){
+                ss << std::get<int>(node->value);
+            }
+            if(std::holds_alternative<std::string>(node->value)){
+                ss << "\"" << std::get<std::string>(node->value) << "\"";
+            }
+            if(std::holds_alternative<bool>(node->value)){
+                ss << std::boolalpha<< std::get<bool>(node->value);
 
+            }
+            if(std::holds_alternative<ModelNode::NullType>(node->value)){
+                ss << "null";
+            }
+            if(std::holds_alternative<ModelNode::ObjectType>(node->value)){
+                auto& obj = std::get<ModelNode::ObjectType>(node->value);
+                ss << "{";
+                for (auto iter = obj.begin(); iter != obj.end(); ++iter) {
+                    if (iter != obj.begin()) ss << ", ";
+                    ss << "\"" << iter->first << "\":" << nodePtrToString(iter->second);
+                }
+                ss << "}";
+            } else if (std::holds_alternative<ModelNode::ListType>(node->value)) {
+                // Serialize nested list
+                auto& list = std::get<ModelNode::ListType>(node->value);
+                ss << "[";
+                for (size_t i = 0; i < list.size(); ++i) {
+                    if (i > 0) ss << ", ";
+                    ss << nodePtrToString(list[i]);
+                }
+                ss << "]";
+        }
+            return ss.str();
+        }
+
+        struct FilterQuery{
+            std::string target;
+            std::string operation;
+            std::string value;
+        };
+
+        FilterQuery parseFilterQuery(const std::string &aQuery){
+            FilterQuery result;
+            std::stringstream ss(aQuery);
+            ss >> result.target;
+            if(result.target == "key"){
+                ss >> result.operation;
+                std::getline(ss,result.value, '\'');
+                std::getline(ss,result.value,'\'');
+            }else if(result.target == "index"){
+                ss >> result.operation;
+                ss >> result.value;
+            }
+        return result;
+        }
 	};
 
 
