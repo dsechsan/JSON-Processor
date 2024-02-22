@@ -58,21 +58,20 @@ int main(const int argc, const char* argv[]) {
         return runTest(argc, argv);
 
     // Add your testing code here!
-//    using ModelNode = ECE141::ModelNode;
-//    ModelNode myNode;
-////    myNode.value = ModelNode::ObjectType{{"key", ModelNode{5.0}}};
-//
-//    std::string filepath = "/Users/dsechs/Library/CloudStorage/OneDrive-UCSanDiego/Desktop/ECE 141A/PA3/Resources/sammy.json";
-//    std::ifstream inputFile(filepath);
-////    std::istream& inputStream = inputFile;
-//
-//    ECE141::JSONParser jsonParser(inputFile);
-//    ECE141::Model model;
-//    jsonParser.parse(&model);
+    using ModelNode = ECE141::ModelNode;
+    ModelNode myNode;
+//    myNode.value = ModelNode::ObjectType{{"key", ModelNode{5.0}}};
+
+    std::string filepath = "/Users/dsechs/Library/CloudStorage/OneDrive-UCSanDiego/Desktop/ECE 141A/PA3/Resources/sammy.json";
+    std::ifstream inputFile(filepath);
+
+    ECE141::JSONParser jsonParser(inputFile);
+    ECE141::Model model;
+    jsonParser.parse(&model);
 
 
-//    auto theQuery = model.createQuery();
-//    auto theResult = theQuery.select("'sammy'.'followers'");
+    auto theQuery1 = model.createQuery();
+    auto theResult1 = theQuery1.select("'sammy'.'followers'");
 
 //    if(theResult) std::cout << *theResult << "\n";
 
@@ -80,28 +79,16 @@ int main(const int argc, const char* argv[]) {
     ECE141::Model model2(model);
     auto model3 = model2;
 
-    auto theQuery = model.createQuery();
-    auto theResult = theQuery.select("'list'").filter("index < 2").get("*");
 
-    if (theResult) std::cout << *theResult << "\n";
+    auto theQuery2 = model.createQuery();
+    auto theResult2 = theQuery2.select("'list'").filter("index < 2").get("*");
+
+    if (theResult2) std::cout << *theResult2 << "\n";
 
     std::string aPath = "/Users/dsechs/Library/CloudStorage/OneDrive-UCSanDiego/Desktop/ECE 141A/PA3";
-    std::string aTestName = "AdvancedTest";
+    std::string aTestName = "NoFilterTest";
 
     runAutoGraderTest(aPath,aTestName);
-//    ECE141::Model model2(model);
-//    auto model3 = model2;
-//
-//
-//    auto theQuery = model.createQuery();
-//    auto theResult = theQuery.select("'list'").filter("index < 2").get("*");
-//
-//    if (theResult) std::cout << *theResult << "\n";
-//
-//    std::string aPath = "/Users/dsechs/Library/CloudStorage/OneDrive-UCSanDiego/Desktop/ECE 141A/PA3";
-//    std::string aTestName = "";
-//
-//    runAutoGraderTest(aPath,aTestName);
 
 
 }
