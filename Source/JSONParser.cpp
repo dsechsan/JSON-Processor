@@ -109,7 +109,7 @@ namespace ECE141 {
 		if (!states.empty())
 			states.pop();
 
-		return (!aListener) || aListener->closeContainer(theKey, aType);
+		return (!aListener) || aListener->closeContainer();
 	}
 
 
