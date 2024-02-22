@@ -14,11 +14,13 @@ namespace ECE141 {
 
 	Model::Model(const Model& aModel) {
         if(aModel.rootNode){
+            // deep copies the data from the rootNode of aModel;
             rootNode = std::make_shared<ModelNode>(*aModel.rootNode);
         }
 	}
 
 	Model &Model::operator=(const Model& aModel) {
+        // deep copies the entire model
         if(this!= &aModel){
             if(aModel.rootNode){
                 rootNode = std::make_shared<ModelNode>(*aModel.rootNode);
@@ -31,46 +33,17 @@ namespace ECE141 {
 
 	ModelQuery Model::createQuery(){
         return ModelQuery(*this);
-//        return *this;
     }
 
 
 	bool Model::addKeyValuePair(const std::string& aKey, const std::string& aValue, Element aType) {
-//        ModelNode theNewNode;
+        // get the top of the nodeStack and update the object
         if(!nodeStack.empty()) {
             auto &currentNode = nodeStack.back();
             if(std::holds_alternative<ModelNode::ObjectType>(currentNode->value)) {
                 auto &obj =std::get<ModelNode::ObjectType>(currentNode->value);
                 auto theNewNode = std::make_shared<ModelNode>();
-                switch (aType) {
-                    case Element::quoted:
-                        theNewNode->value = aValue;
-                        break;
-                    case Element::constant:
-                        if (aValue == "true" || aValue == "false") {
-                            bool theBoolValue = convertToType<bool>(aValue);
-                            theNewNode->value = theBoolValue;
-                        } else if (aValue == "null") {
-                            theNewNode->value = ModelNode::NullType{};
-                        } else {
-                            std::stringstream iss(aValue);
-                            double dValue;
-                            iss >> dValue;
-
-                            if (!iss.fail() && iss.eof()) {
-                                if (dValue == static_cast<double>(static_cast<int>(dValue))) {
-                                    theNewNode->value = static_cast<int>(dValue);
-                                } else {
-                                    theNewNode->value = dValue;
-                                }
-                            }
-                        }
-                        break;
-
-                    default:
-                        theNewNode->value = aValue;
-                        break;
-                }
+                updateTheNewNode(aType,theNewNode,aValue);
                 obj.insert({aKey,theNewNode});
                 return true;
             }
@@ -80,40 +53,13 @@ namespace ECE141 {
 
 
 	bool Model::addItem(const std::string& aValue, Element aType) {
+        //get the top of the nodeStack and update the list
         if(!nodeStack.empty()) {
             auto &currentNode = nodeStack.back();
             if(std::holds_alternative<ModelNode::ListType>(currentNode->value)) {
                 auto &list =std::get<ModelNode::ListType>(currentNode->value);
                 auto theNewNode = std::make_shared<ModelNode>();
-                switch (aType) {
-                    case Element::quoted:
-                        theNewNode->value = aValue;
-                        break;
-                    case Element::constant:
-                        if (aValue == "true" || aValue == "false") {
-                            bool theBoolValue = convertToType<bool>(aValue);
-                            theNewNode->value = theBoolValue;
-                        } else if (aValue == "null") {
-                            theNewNode->value = ModelNode::NullType{};
-                        } else {
-                            std::stringstream iss(aValue);
-                            double dValue;
-                            iss >> dValue;
-
-                            if (!iss.fail() && iss.eof()) {
-                                if (dValue == static_cast<double>(static_cast<int>(dValue))) {
-                                    theNewNode->value = static_cast<int>(dValue);
-                                } else {
-                                    theNewNode->value = dValue;
-                                }
-                            }
-                        }
-                        break;
-
-                    default:
-                        theNewNode->value = aValue;
-                        break;
-                }
+                updateTheNewNode(aType,theNewNode,aValue);
                 list.push_back(theNewNode);
                 return true;
             }
@@ -123,9 +69,9 @@ namespace ECE141 {
 	}
 
 	bool Model::openContainer(const std::string& aKey, Element aType) {
+        // Create a new shared pointer, map it to the key and push it to the top of the stack
+        // If it is a list, add the pointer directly to the list
        auto theNewNode = std::make_shared<ModelNode>();
-//       ModelNode theNewNode;
-
        if(aType == Element::object) {
            theNewNode->value = ModelNode::ObjectType();
        }else if(aType == Element::array){
@@ -152,6 +98,7 @@ namespace ECE141 {
 	}
 
 	bool Model::closeContainer() {
+        // since we have shared pointers, no need to worry about data retention
         if(!nodeStack.empty()){
             nodeStack.pop_back();
             return true;
@@ -180,13 +127,17 @@ namespace ECE141 {
         // parse query
         // if query has key contains,
         //      check if the current container is an object
-        //      check for the key substrings (find)
-        //      if it is, copy the pointer to a filteredObject and erase the rest
+        //      deepcopy the current container to a filteredObject
+        //      if key doesn't contain the value, erase, else continue
+        //      create a new pointer and assign its value to the filteredObject
         //      return the new pointer
         // if query has index,
-        //      check if the current container is a list
-        //      check if the value of the index is within limits
-        //      move the pointer there and return it.
+        //     check if the current container is an object
+        //     deepcopy the current container to a filteredList
+        //     check if the current index is supposed to be erased or retained
+        //     erase the relevant values
+        //     create a new pointer and assign its value to the filteredList
+        //     return the new pointer
 
         auto theParsedString = parseFilterQuery(aQuery);
 
@@ -206,7 +157,7 @@ namespace ECE141 {
                 theFilteredNode->value = filteredObj;
                 currentNode = theFilteredNode;
             }
-        }else if (currentNode && std::holds_alternative<ModelNode::ListType>(currentNode->value)) {
+        }else if (theParsedString.target == "index" && std::holds_alternative<ModelNode::ListType>(currentNode->value)) {
             auto &list = std::get<ModelNode::ListType>(currentNode->value);
             auto filteredList = ModelNode::deepCopyListType(list);
             auto iter = filteredList.begin();
@@ -247,6 +198,7 @@ namespace ECE141 {
 
 
 	size_t ModelQuery::count() {
+        // returns the size of the object/list
         if (!currentNode) {
             return 0;
         }
@@ -285,6 +237,11 @@ namespace ECE141 {
 	}
 
 	std::optional<std::string> ModelQuery::get(const std::string& aKeyOrIndex) {
+        // checks if the input is * or string or integer;
+        // * prints all using a stringstream
+        // string prints the value of the key
+        // integer prints the values of the list;
+
         if(!currentNode){
             return std::nullopt;
         }
