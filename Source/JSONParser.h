@@ -32,7 +32,7 @@ namespace ECE141 {
 		virtual bool openContainer(const std::string& aKey, Element aType) = 0;
 
 		// End of an object or list container ('}' or ']')
-		virtual bool closeContainer(const std::string& aKey, Element aType) = 0;
+		virtual bool closeContainer() = 0;
 
 	};
 

@@ -151,14 +151,13 @@ namespace ECE141 {
        return true;
 	}
 
-	bool Model::closeContainer(const std::string& aKey, Element aType) {
+	bool Model::closeContainer() {
         if(!nodeStack.empty()){
             nodeStack.pop_back();
             return true;
         }
         return false;
 	}
-
 
 
     // ---ModelQuery---

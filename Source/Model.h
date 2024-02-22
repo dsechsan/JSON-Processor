@@ -109,7 +109,7 @@ namespace ECE141 {
 		bool addKeyValuePair(const std::string &aKey, const std::string &aValue, Element aType) override;
 		bool addItem(const std::string &aValue, Element aType) override;
 		bool openContainer(const std::string &aKey, Element aType) override;
-		bool closeContainer(const std::string &aKey, Element aType) override;
+		bool closeContainer() override;
 
 
 		// STUDENT: Your model will contain a collection of ModelNode*'s
