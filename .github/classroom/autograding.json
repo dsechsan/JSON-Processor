@@ -22,7 +22,7 @@
     },
     {
       "name": "NoFilter Test",
-      "setup": "",
+      "setup": "cmake -B Builds; make -C Builds --silent",
       "run": "printf '\\n\\nRunning test...\\n\\n'; ./Builds/Assignment_3 nofilter .",
       "input": "",
       "output": "",
@@ -32,7 +32,7 @@
     },
     {
       "name": "Query Test",
-      "setup": "",
+      "setup": "cmake -B Builds; make -C Builds --silent",
       "run": "printf '\\n\\nRunning test...\\n\\n'; ./Builds/Assignment_3 query .",
       "input": "",
       "output": "",
@@ -42,7 +42,7 @@
     },
     {
       "name": "Basic Test",
-      "setup": "",
+      "setup": "cmake -B Builds; make -C Builds --silent ",
       "run": "printf '\\n\\nRunning test...\\n\\n'; ./Builds/Assignment_3 basic .",
       "input": "",
       "output": "",
@@ -52,7 +52,7 @@
     },
     {
       "name": "Advanced Test",
-      "setup": "",
+      "setup": "cmake -B Builds; make -C Builds --silent",
       "run": "printf '\\n\\nRunning test...\\n\\n'; ./Builds/Assignment_3 advanced .",
       "input": "",
       "output": "",
