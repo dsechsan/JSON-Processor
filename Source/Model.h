@@ -11,6 +11,7 @@
 #include <vector>
 #include <map>
 #include <sstream>
+#include <memory>
 
 namespace ECE141 {
 
