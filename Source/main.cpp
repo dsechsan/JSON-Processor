@@ -4,6 +4,8 @@
 #include <map>
 #include "JSONParser.h"
 #include "AutoGrader.h"
+#include <memory>
+#include <sstream>
 #include "Testable.h"
 #include "Debug.h"
 
