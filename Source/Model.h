@@ -280,6 +280,7 @@ namespace ECE141 {
             std::string operation;
             std::string value;
         };
+        
         // Parse the strings in the 'filter' query.
         FilterQuery parseFilterQuery(const std::string &aQuery){
             FilterQuery result;

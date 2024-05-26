@@ -9,6 +9,12 @@ FILE(GLOB MY_SOURCES Source/**)
 # Create executable
 add_executable(Assignment_3 ${MY_SOURCES})
 
+include_directories(/usr/local/include/)
+
+#target_link_libraries(Assignment_3 gtest gtest_main pthread)
+
+
+
 # Set warning level
 if (MSVC)
     target_compile_options(Assignment_3 PRIVATE /W4)
